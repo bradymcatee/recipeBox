@@ -22,9 +22,9 @@ CREATE TABLE ingredientrel(
     amount INTEGER,
     PRIMARY KEY(recipe_id, ingredient_id),
     FOREIGN KEY(recipe_id)
-        REFERENCES(recipes(recipe_id))
-        ON DELETE CASCADE
+        REFERENCES recipes(recipe_id)
+        ON DELETE CASCADE,
     FOREIGN KEY(ingredient_id)
-        REFERENCES(ingredients(ingredient_id))
+        REFERENCES ingredients(ingredient_id)
         ON DELETE CASCADE
 );

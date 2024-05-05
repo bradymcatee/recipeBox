@@ -32,7 +32,7 @@ const RecipeInputForm = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await axios.get("http://localhost:9000/ingredients");
+      const response = await axios.get("/ingredients");
       setAllIngredients(response.data);
     } catch (error) {
       console.log(error.message);
@@ -61,7 +61,7 @@ const RecipeInputForm = () => {
   };
   const saveNewIngredient = () => {
     axios
-      .post("http://localhost:9000/ingredients", newIngredient)
+      .post("/ingredients", newIngredient)
       .then((response) => {
         alert("Ingredient added successfully!");
         fetchIngredients();
@@ -88,16 +88,13 @@ const RecipeInputForm = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const recipeResponse = await axios.post(
-        "http://localhost:9000/recipes",
-        recipe
-      );
+      const recipeResponse = await axios.post("/recipes", recipe);
       const recipeId = recipeResponse.data.recipe_id;
       const ingredientPromises = ingredients.map((ingredient) => {
         if (!ingredient.ingredientId || !ingredient.amount) {
           throw new Error("Incomplete ingredient data");
         }
-        return axios.post("http://localhost:9000/ingredientrel", {
+        return axios.post("/ingredientrel", {
           recipe_id: recipeId,
           ingredient_id: parseInt(ingredient.ingredientId, 10),
           amount: parseInt(ingredient.amount, 10),

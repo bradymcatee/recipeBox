@@ -18,7 +18,7 @@ const IngredientsTable = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await axios.get("http://localhost:9000/ingredients");
+      const response = await axios.get("/ingredients");
       setIngredients(response.data);
     } catch (error) {
       console.error("Error fetching ingredients:", error);
@@ -26,7 +26,7 @@ const IngredientsTable = () => {
   };
   const deleteIngredients = async (id) => {
     try {
-      await axios.delete(`http://localhost:9000/ingredients/${id}`);
+      await axios.delete(`/ingredients/${id}`);
       setIngredients(
         ingredients.filter((ingredients) => ingredients.ingredient_id !== id)
       );
@@ -48,7 +48,7 @@ const IngredientsTable = () => {
   };
   const saveNewIngredient = () => {
     axios
-      .post("http://localhost:9000/ingredients", newIngredient)
+      .post("/ingredients", newIngredient)
       .then((response) => {
         alert("Ingredient added successfully!");
         fetchIngredients();
@@ -61,10 +61,7 @@ const IngredientsTable = () => {
   };
   const saveEditedIngredient = () => {
     axios
-      .put(
-        `http://localhost:9000/ingredients/${currentIngredient.ingredient_id}`,
-        currentIngredient
-      )
+      .put(`/ingredients/${currentIngredient.ingredient_id}`, currentIngredient)
       .then((response) => {
         alert("Ingredient updated successfully!");
         fetchIngredients();

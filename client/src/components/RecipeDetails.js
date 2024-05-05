@@ -9,14 +9,12 @@ const RecipeDetails = () => {
 
   const fetchRecipeAndIngredients = useCallback(async () => {
     try {
-      const recipeResponse = await axios.get(
-        `http://localhost:9000/recipes/${id}`
-      );
+      const recipeResponse = await axios.get(`/recipes/${id}`);
       setRecipe(recipeResponse.data[0]);
       console.log("Recipe data:", recipeResponse.data[0]);
 
       const ingredientsResponse = await axios.get(
-        `http://localhost:9000/ingredientrel/recipes/${id}/ingredients`
+        `/ingredientrel/recipes/${id}/ingredients`
       );
       setIngredients(ingredientsResponse.data);
       console.log("Ingredients data:", ingredientsResponse.data);

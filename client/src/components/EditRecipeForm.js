@@ -24,15 +24,13 @@ const EditRecipeForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const recipeResponse = await axios.get(
-          `http://localhost:9000/recipes/${recipeId}`
-        );
+        const recipeResponse = await axios.get(`/recipes/${recipeId}`);
         if (recipeResponse.data) {
           setRecipe(recipeResponse.data[0]);
         }
 
         const ingredientsResponse = await axios.get(
-          `http://localhost:9000/ingredientrel/recipes/${recipeId}/ingredients`
+          `/ingredientrel/recipes/${recipeId}/ingredients`
         );
         const existingIngredients = ingredientsResponse.data.map((ing) => ({
           ...ing,
@@ -40,9 +38,7 @@ const EditRecipeForm = () => {
         }));
         setIngredients(existingIngredients);
 
-        const allIngredientsResponse = await axios.get(
-          "http://localhost:9000/ingredients"
-        );
+        const allIngredientsResponse = await axios.get("/ingredients");
         setAllIngredients(allIngredientsResponse.data);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -88,10 +84,7 @@ const EditRecipeForm = () => {
   };
   const saveNewIngredient = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:9000/ingredients",
-        newIngredient
-      );
+      const response = await axios.post("/ingredients", newIngredient);
       setAllIngredients((prev) => [...prev, response.data]);
       setShowModal(false);
     } catch (error) {
@@ -118,7 +111,7 @@ const EditRecipeForm = () => {
     try {
       const deletePromises = deletedIngredients.map((ingredient_id) =>
         axios.delete(
-          `http://localhost:9000/ingredientrel/recipes/${recipe.recipe_id}/ingredients/${ingredient_id}`
+          `/ingredientrel/recipes/${recipe.recipe_id}/ingredients/${ingredient_id}`
         )
       );
       await Promise.all(deletePromises);
@@ -129,14 +122,11 @@ const EditRecipeForm = () => {
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const updateRecipePromise = axios.put(
-      `http://localhost:9000/recipes/${recipeId}`,
-      recipe
-    );
+    const updateRecipePromise = axios.put(`/recipes/${recipeId}`, recipe);
     const postPromises = ingredients
       .filter((ing) => ing.status === "new")
       .map((ing) =>
-        axios.post(`http://localhost:9000/ingredientrel`, {
+        axios.post(`/ingredientrel`, {
           recipe_id: recipeId,
           ingredient_id: ing.ingredientId,
           amount: ing.amount,
@@ -146,7 +136,7 @@ const EditRecipeForm = () => {
       .filter((ing) => ing.status === "updated")
       .map((ing) =>
         axios.put(
-          `http://localhost:9000/ingredientrel/recipes/${recipe.recipe_id}/ingredients/${ing.ingredient_id}`,
+          `/ingredientrel/recipes/${recipe.recipe_id}/ingredients/${ing.ingredient_id}`,
           {
             amount: ing.amount,
           }
