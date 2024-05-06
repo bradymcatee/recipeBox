@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import NavBar from "./NavBar";
 
 const RecipesTable = () => {
   const [recipes, setRecipes] = useState([]);
@@ -29,6 +30,7 @@ const RecipesTable = () => {
 
   return (
     <Fragment>
+      <NavBar />
       <div className="container mt-4">
         <h2>Recipes</h2>
         <table className="table table-striped table-hover">
