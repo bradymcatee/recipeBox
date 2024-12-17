@@ -1,123 +1,193 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import NavBar from "./NavBar";
 
 const RecipesTable = () => {
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [sortField, setSortField] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const categories = [
+    "Sauce",
+    "Entree",
+    "Dessert",
+    "Pasta",
+    "Grain",
+    "Vegetable",
+  ];
 
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const response = await axios.get("/recipes");
-        setRecipes(response.data);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-      }
-    };
-
     fetchRecipes();
   }, []);
 
-  const deleteRecipe = async (id) => {
+  const fetchRecipes = async () => {
     try {
-      await axios.delete(`/recipes/${id}`);
-      setRecipes(recipes.filter((recipe) => recipe.recipe_id !== id));
+      setLoading(true);
+      const response = await axios.get("/recipes");
+      setRecipes(response.data);
     } catch (error) {
-      console.log("Error deleting recipe:", error);
+      console.error("Error fetching recipes:", error);
+      alert("Error loading recipes");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <Fragment>
-      <NavBar />
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this recipe?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/recipes/${id}`);
+      setRecipes(recipes.filter((recipe) => recipe.id !== id));
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      alert("Error deleting recipe");
+    }
+  };
+
+  const handleSort = (field) => {
+    setSortDirection((current) => {
+      if (sortField === field) {
+        return current === "asc" ? "desc" : "asc";
+      }
+      return "asc";
+    });
+    setSortField(field);
+  };
+
+  const getSortedRecipes = () => {
+    return recipes
+      .filter((recipe) => {
+        const matchesSearch = recipe.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesCategory =
+          !filterCategory || recipe.category === filterCategory;
+        return matchesSearch && matchesCategory;
+      })
+      .sort((a, b) => {
+        const multiplier = sortDirection === "asc" ? 1 : -1;
+        return multiplier * a[sortField].localeCompare(b[sortField]);
+      });
+  };
+
+  if (loading) {
+    return (
       <div className="container mt-4">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Recipes</h2>
-        <table className="table table-striped table-hover">
+        <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+          Back
+        </button>
+      </div>
+
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search recipes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="col-md-6">
+          <select
+            className="form-select"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="table-responsive">
+        <table className="table table-hover">
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Category</th>
-              <th scope="col">Station</th>
-              <th scope="col"></th>
-              <th scope="col"></th>
+              <th
+                onClick={() => handleSort("name")}
+                style={{ cursor: "pointer" }}
+              >
+                Name{" "}
+                {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+              </th>
+              <th
+                onClick={() => handleSort("category")}
+                style={{ cursor: "pointer" }}
+              >
+                Category{" "}
+                {sortField === "category" &&
+                  (sortDirection === "asc" ? "↑" : "↓")}
+              </th>
+              <th
+                onClick={() => handleSort("station")}
+                style={{ cursor: "pointer" }}
+              >
+                Station{" "}
+                {sortField === "station" &&
+                  (sortDirection === "asc" ? "↑" : "↓")}
+              </th>
+              <th className="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {recipes.map((recipe) => (
-              <tr key={recipe.recipe_id}>
+            {getSortedRecipes().map((recipe) => (
+              <tr key={recipe.id}>
                 <td>
-                  <Link to={`/recipe/${recipe.recipe_id}`}>{recipe.name}</Link>
+                  <Link to={`/recipe/${recipe.id}`}>{recipe.name}</Link>
                 </td>
                 <td>{recipe.category}</td>
                 <td>{recipe.station}</td>
-                <td>
+                <td className="text-end">
                   <Link
-                    to={`/recipes/edit/${recipe.recipe_id}`}
-                    className="btn btn-primary btn-sm"
+                    to={`/recipes/edit/${recipe.id}`}
+                    className="btn btn-primary btn-sm me-2"
                   >
                     Edit
                   </Link>
-                </td>
-                <td>
                   <button
-                    type="button"
+                    onClick={() => handleDelete(recipe.id)}
                     className="btn btn-danger btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target={`#deleteModal${recipe.recipe_id}`}
                   >
                     Delete
                   </button>
-                  <div className="modal" id={`deleteModal${recipe.recipe_id}`}>
-                    <div className="modal-dialog">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h4 className="modal-title">Are you sure?</h4>
-                          <button
-                            type="button"
-                            className="btn-close"
-                            data-bs-dismiss="modal"
-                          ></button>
-                        </div>
-                        <div className="modal-body">
-                          Do you really want to delete this recipe? This process
-                          cannot be undone.
-                        </div>
-                        <div className="modal-footer">
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            data-bs-dismiss="modal"
-                            onClick={() => deleteRecipe(recipe.recipe_id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="vertical-button-group">
-          <Link to="/create-recipe" className="btn btn-success mt-5">
-            Add New Recipe
-          </Link>
-          <Link to="/ingredients" className="btn btn-primary mt-5">
-            Manage Ingredients
-          </Link>
-        </div>
       </div>
-    </Fragment>
+
+      {recipes.length === 0 && (
+        <div className="alert alert-info">
+          No recipes found. Add your first recipe to get started!
+        </div>
+      )}
+
+      <Link to="/recipes/new" className="btn btn-success mt-3">
+        Add New Recipe
+      </Link>
+    </div>
   );
 };
 

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "engines": {
-    "node": "21.7.3",
-    "npm": "10.5.2"
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
@@ -18,10 +18,10 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "nodemon": "^3.1.0",
-    "pg": "^8.11.5"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

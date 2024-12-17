@@ -1,30 +1,17 @@
 CREATE DATABASE recipebox;
 
-CREATE TABLE recipes(
-    recipe_id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    category VARCHAR(255),
-    station VARCHAR(255),
+CREATE TABLE recipes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     instructions TEXT,
-    yield INTEGER
+    yield VARCHAR(100),
+    category VARCHAR(100),
+    station VARCHAR(100)
 );
 
-CREATE TABLE ingredients(
-    ingredient_id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    category VARCHAR(255),
-    price INTEGER
-);
-
-CREATE TABLE ingredientrel(
-    recipe_id INTEGER,
-    ingredient_id INTEGER,
-    amount INTEGER,
-    PRIMARY KEY(recipe_id, ingredient_id),
-    FOREIGN KEY(recipe_id)
-        REFERENCES recipes(recipe_id)
-        ON DELETE CASCADE,
-    FOREIGN KEY(ingredient_id)
-        REFERENCES ingredients(ingredient_id)
-        ON DELETE CASCADE
+CREATE TABLE recipe_ingredients (
+    recipe_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    sort_order INTEGER,
+    PRIMARY KEY (recipe_id, sort_order)
 );

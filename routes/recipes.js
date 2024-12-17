@@ -2,69 +2,150 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db.js");
 
-//create recipe
+// Create recipe
 router.post("/", async (req, res) => {
+  const client = await pool.connect();
   try {
-    const { name, category, station, instructions, yield } = req.body;
-    const newRecipe = await pool.query(
-      "INSERT INTO recipes(name, category, station, instructions, yield ) VALUES($1, $2, $3, $4, $5) RETURNING *",
-      [name, category, station, instructions, yield]
+    await client.query("BEGIN");
+
+    const { name, instructions, yield, category, station, ingredients } =
+      req.body;
+
+    // Create recipe
+    const recipeResult = await client.query(
+      "INSERT INTO recipes (name, instructions, yield, category, station) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      [name, instructions, yield, category, station]
     );
-    res.json(newRecipe.rows[0]);
+
+    const recipeId = recipeResult.rows[0].id;
+
+    // Add ingredients
+    if (ingredients && ingredients.length > 0) {
+      for (let i = 0; i < ingredients.length; i++) {
+        await client.query(
+          "INSERT INTO recipe_ingredients (recipe_id, description, sort_order) VALUES ($1, $2, $3)",
+          [recipeId, ingredients[i], i + 1]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    res.json({ id: recipeId });
   } catch (error) {
-    console.log(error.message);
+    await client.query("ROLLBACK");
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    client.release();
   }
 });
 
-//get all recipes
+// Get all recipes
 router.get("/", async (req, res) => {
   try {
-    const getAllRecipes = await pool.query("SELECT * FROM recipes");
+    const getAllRecipes = await pool.query(
+      "SELECT * FROM recipes ORDER BY name"
+    );
     res.json(getAllRecipes.rows);
   } catch (error) {
-    console.log(error.message);
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 });
-//get a recipe
+
+// Get a recipe with its ingredients
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const recipe = await pool.query(
-      "SELECT * FROM recipes WHERE recipe_id=$1",
+    const recipeResult = await pool.query(
+      "SELECT * FROM recipes WHERE id = $1",
       [id]
     );
-    res.json(recipe.rows);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
 
-//update a recipe
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, category, station, instructions, yield } = req.body;
-    const updateRecipe = await pool.query(
-      "UPDATE recipes SET name=$1, category=$2, station=$3, instructions=$4, yield=$5 WHERE recipe_id=$6",
-      [name, category, station, instructions, yield, id]
+    if (recipeResult.rows.length === 0) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    const ingredientsResult = await pool.query(
+      "SELECT description FROM recipe_ingredients WHERE recipe_id = $1 ORDER BY sort_order",
+      [id]
     );
-    res.json(`Recipe with id: ${id} successfully updated`);
+
+    const recipe = recipeResult.rows[0];
+    recipe.ingredients = ingredientsResult.rows.map((row) => row.description);
+
+    res.json(recipe);
   } catch (error) {
-    console.log(error.message);
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 });
-//delete a recipe
 
+// Update a recipe
+router.put("/:id", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const { id } = req.params;
+    const { name, instructions, yield, category, station, ingredients } =
+      req.body;
+
+    // Update recipe
+    const updateRecipe = await client.query(
+      "UPDATE recipes SET name = $1, instructions = $2, yield = $3, category = $4, station = $5 WHERE id = $6 RETURNING *",
+      [name, instructions, yield, category, station, id]
+    );
+
+    if (updateRecipe.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Delete existing ingredients
+    await client.query("DELETE FROM recipe_ingredients WHERE recipe_id = $1", [
+      id,
+    ]);
+
+    // Add new ingredients
+    if (ingredients && ingredients.length > 0) {
+      for (let i = 0; i < ingredients.length; i++) {
+        await client.query(
+          "INSERT INTO recipe_ingredients (recipe_id, description, sort_order) VALUES ($1, $2, $3)",
+          [id, ingredients[i], i + 1]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    res.json(updateRecipe.rows[0]);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    client.release();
+  }
+});
+
+// Delete a recipe
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleteRecipe = await pool.query(
-      "DELETE FROM recipes WHERE recipe_id=$1",
+
+    const result = await pool.query(
+      "DELETE FROM recipes WHERE id = $1 RETURNING *",
       [id]
     );
-    res.json(`Recipe with id: ${id} successfully deleted`);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    res.json({ message: "Recipe deleted successfully" });
   } catch (error) {
-    console.log(error.message);
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 });
 
