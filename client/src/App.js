@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import RecipesTable from "./components/RecipesTable";
-import RecipeDetails from "./components/RecipeDetails";
+import RecipeCard from "./components/RecipeCard";
 import RecipeForm from "./components/RecipeForm";
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
 
           {/* Recipe routes */}
           <Route path="/recipes" element={<RecipesTable />} />
-          <Route path="/recipe/:id" element={<RecipeDetails />} />
+          <Route path="/recipe/:id" element={<RecipeCard />} />
           <Route path="/recipes/new" element={<RecipeForm />} />
           <Route path="/recipes/edit/:id" element={<RecipeForm />} />
 

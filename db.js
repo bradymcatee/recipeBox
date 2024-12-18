@@ -19,7 +19,4 @@ const pool = new Pool(
   process.env.NODE_ENV === "production" ? proConfig : devConfig
 );
 
-console.log("Password:", process.env.PG_PASSWORD);
-console.log("Environment:", process.env.NODE_ENV);
-
 module.exports = pool;

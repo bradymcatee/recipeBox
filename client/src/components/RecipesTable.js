@@ -89,9 +89,14 @@ const RecipesTable = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Recipes</h2>
-        <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-          Back
-        </button>
+        <div>
+          <Link to="/recipes/new" className="btn btn-success me-2">
+            Add New Recipe
+          </Link>
+          <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+            Back
+          </button>
+        </div>
       </div>
 
       <div className="row mb-4">
@@ -183,10 +188,6 @@ const RecipesTable = () => {
           No recipes found. Add your first recipe to get started!
         </div>
       )}
-
-      <Link to="/recipes/new" className="btn btn-success mt-3">
-        Add New Recipe
-      </Link>
     </div>
   );
 };

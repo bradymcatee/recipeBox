@@ -37,9 +37,21 @@ const RecipeForm = () => {
       setLoading(false);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation step
+    if (
+      !recipe.name.trim() ||
+      !recipe.category ||
+      !recipe.ingredients.trim() ||
+      !recipe.instructions.trim()
+    ) {
+      alert("Validation Error: Please fill out all required fields.");
+      return;
+    }
+
+    // Submission step
     try {
       setLoading(true);
       const ingredientsList = recipe.ingredients
@@ -60,7 +72,7 @@ const RecipeForm = () => {
       navigate("/recipes");
     } catch (error) {
       console.error("Error saving recipe:", error);
-      alert("Error saving recipe");
+      alert(`Error: ${error.message || "An unexpected error occurred."}`);
     } finally {
       setLoading(false);
     }
@@ -79,10 +91,13 @@ const RecipeForm = () => {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate role="form">
         <div className="mb-3">
-          <label className="form-label">Name</label>
+          <label htmlFor="recipeName" className="form-label">
+            Name
+          </label>
           <input
+            id="recipeName"
             type="text"
             className="form-control"
             value={recipe.name}
@@ -92,8 +107,11 @@ const RecipeForm = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Category</label>
+          <label htmlFor="category" className="form-label">
+            Category
+          </label>
           <select
+            id="category"
             className="form-select"
             value={recipe.category}
             onChange={(e) => setRecipe({ ...recipe, category: e.target.value })}
@@ -109,8 +127,11 @@ const RecipeForm = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Station</label>
+          <label htmlFor="station" className="form-label">
+            Station
+          </label>
           <input
+            id="station"
             type="text"
             className="form-control"
             value={recipe.station}
@@ -119,8 +140,11 @@ const RecipeForm = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Ingredients</label>
+          <label htmlFor="ingredients" className="form-label">
+            Ingredients
+          </label>
           <textarea
+            id="ingredients"
             className="form-control"
             rows="8"
             value={recipe.ingredients}
@@ -133,8 +157,11 @@ const RecipeForm = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Instructions</label>
+          <label htmlFor="instructions" className="form-label">
+            Instructions
+          </label>
           <textarea
+            id="instructions"
             className="form-control"
             rows="4"
             value={recipe.instructions}
@@ -145,8 +172,11 @@ const RecipeForm = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Yield</label>
+          <label htmlFor="yield" className="form-label">
+            Yield
+          </label>
           <input
+            id="yield"
             type="text"
             className="form-control"
             value={recipe.yield}

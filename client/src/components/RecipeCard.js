@@ -2,28 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const RecipeDetails = () => {
+const RecipeCard = () => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/recipes/${id}`);
+        setRecipe(response.data);
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+        alert("Error loading recipe");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchRecipe();
   }, [id]);
-
-  const fetchRecipe = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`/recipes/${id}`);
-      setRecipe(response.data);
-    } catch (error) {
-      console.error("Error fetching recipe:", error);
-      alert("Error loading recipe");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -116,4 +115,4 @@ const RecipeDetails = () => {
   );
 };
 
-export default RecipeDetails;
+export default RecipeCard;
