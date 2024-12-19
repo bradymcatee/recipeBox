@@ -86,7 +86,7 @@ const RecipeCard = () => {
             <div className="card-body">
               <h5 className="card-title">Ingredients</h5>
               <ul className="list-group list-group-flush">
-                {recipe.ingredients.map((ingredient, index) => (
+                {recipe.ingredients?.map((ingredient, index) => (
                   <li key={index} className="list-group-item">
                     {ingredient}
                   </li>

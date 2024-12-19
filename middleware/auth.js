@@ -47,4 +47,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, ROLE_PERMISSIONS };
+module.exports = { auth: authMiddleware, ROLE_PERMISSIONS };

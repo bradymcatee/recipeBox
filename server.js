@@ -1,16 +1,22 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const PORT = process.env.PORT || 9000;
-const path = require("path");
+const pool = require("./db");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
+const PORT = process.env.PORT || 9000;
 // middleware
 app.use(cors());
 app.use(express.json());
 
-// routes
-const recipes = require("./routes/recipes");
-app.use("/recipes", recipes);
+// import routes
+const recipesRouter = require("./routes/recipes");
+const authRouter = require("./routes/auth"); // new auth routes
+
+// use routes
+app.use("/recipes", recipesRouter);
+app.use("/auth", authRouter);
 
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {
