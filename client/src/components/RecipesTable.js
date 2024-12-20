@@ -31,7 +31,7 @@ const RecipesTable = () => {
       setRecipes(response.data);
     } catch (error) {
       console.error("Error fetching recipes:", error);
-      alert("Error loading recipes");
+      // alert("Error loading recipes");
     } finally {
       setLoading(false);
     }

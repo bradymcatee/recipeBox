@@ -1,59 +1,111 @@
-# RecipeBox
+# Recipe Box
 
-RecipeBox is a full-stack application built using the PERN stack (PostgreSQL, Express.js, React.js, and Node.js). Designed for restaurants, it allows users to manage their recipes and associated ingredients through a web interface.
+Recipe Box is a web application that allows restaurants to manage their recipes with user role-based permissions. Built with React, Node.js, Express, and PostgreSQL.
 
 ## Features
 
-- **Recipe Management**: Users can create, view, edit, and delete recipes.
-- **Ingredient Tracking**: Manage the inventory of ingredients, update quantities, and track usage across different recipes.
-- **Responsive Design**: The interface is fully responsive and works on various devices, ensuring accessibility from anywhere.
+- User authentication and authorization
+- Role-based access control (Admin, Manager, Chef, Line Cook)
+- Recipe management (create, read, update, delete)
+- Restaurant-specific data separation
+- Responsive design with Bootstrap
 
-## Live Demo
+## Tech Stack
 
-Check out the live demo of recipeBox [here on Heroku](https://recipe-box-demo-1e9d214855ea.herokuapp.com/). Explore the functionality without needing to install anything!
+**Frontend:**
 
-## Getting Started
+- React
+- React Router
+- Axios
+- Bootstrap
 
-These instructions will guide you on setting up your project locally. To get a local copy up and running follow these simple steps.
-
-### Prerequisites
-
-Before starting, ensure you have the following installed:
+**Backend:**
 
 - Node.js
-- npm
+- Express
 - PostgreSQL
+- JWT for authentication
+- Bcrypt for password hashing
 
-### Installation
+## Prerequisites
+
+- Node.js (v14 or higher)
+- PostgreSQL (v12 or higher)
+- npm or yarn
+
+## Database Setup
+
+```sql
+-- Create role enum
+CREATE TYPE user_role AS ENUM ('admin', 'manager', 'chef', 'line_cook');
+
+-- Create tables
+CREATE TABLE restaurants (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    restaurant_id INTEGER REFERENCES restaurants(id) ON DELETE CASCADE,
+    role user_role NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE recipes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(255),
+    station VARCHAR(255),
+    instructions TEXT,
+    yield VARCHAR(100),
+    restaurant_id INTEGER REFERENCES restaurants(id) ON DELETE CASCADE
+);
+```
+
+## Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/bradymcatee/recipeBox.git
-   ```
-2. Install NPM packages:
-   ```bash
-   cd recipeBox
-   npm install
-   ```
-3. Set up your PostgreSQL database and note your credentials.
-4. Create a .env file in your project root and fill in your database details and any other configurations:
-   ```plaintext
-   DB_USER=yourUsername
-   DB_PASSWORD=yourPassword
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_DATABASE=recipeBox
-   ```
-5. Use the provided schema and seed files to set up your database tables and initial data.
-6. To run both the server and the client simultaneously, navigate back to the root directory and run:
-   ```bash
-   npm start
-   ```
 
-### Usage
+```bash
+git clone https://github.com/yourusername/recipe-box.git
+cd recipe-box
+```
 
-Once the application is running, you can navigate to localhost:3000 in your web browser to start managing recipes and ingredients. Add new recipes, modify existing ones, or review your ingredient inventory through intuitive forms and interfaces.
+2. Install backend dependencies:
 
-### License
+```bash
+npm install
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+3. Install frontend dependencies:
+
+```bash
+cd client
+npm install
+```
+
+4. Create environment files:
+   Backend(.env):
+
+```env
+JWT_SECRET=your_secret_key
+PG_USER=your_postgres_user
+PG_HOST=localhost
+PG_DATABASE=recipebox
+PG_PASSWORD=your_postgres_password
+PG_PORT=5432
+PORT=9000
+NODE_ENV=development
+```
+
+5. Start the development server and frontend (from the root directory):
+
+```bash
+npm start
+```

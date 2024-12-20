@@ -21,8 +21,15 @@ export const AuthProvider = ({ children }) => {
     }
   }, [auth]);
 
-  const login = (authData) => setAuth(authData);
-  const logout = () => setAuth(null);
+  const login = (authData) => {
+    setAuth(authData);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${authData.token}`;
+  };
+
+  const logout = () => {
+    setAuth(null);
+    delete axios.defaults.headers.common["Authorization"];
+  };
 
   return (
     <AuthContext.Provider value={{ auth, login, logout }}>
