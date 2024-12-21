@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db.js");
 const bcrypt = require("bcrypt");
+const { auth } = require("../middleware/auth");
 
 // Input validation middleware
 const validateUserInput = (req, res, next) => {
@@ -31,34 +32,15 @@ const validateUserInput = (req, res, next) => {
   next();
 };
 
-// Get all users with pagination
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    const getAllUsers = await pool.query(
-      `SELECT id, email, first_name, last_name, restaurant_id, role, created_at 
-       FROM users 
-       ORDER BY last_name 
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
+    const users = await pool.query(
+      "SELECT * FROM users WHERE restaurant_id = $1",
+      [req.user.restaurant_id]
     );
-
-    const totalUsers = await pool.query("SELECT COUNT(*) FROM users");
-
-    res.json({
-      users: getAllUsers.rows,
-      pagination: {
-        current_page: page,
-        total_pages: Math.ceil(totalUsers.rows[0].count / limit),
-        total_users: parseInt(totalUsers.rows[0].count),
-      },
-    });
+    res.json(users.rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -81,67 +63,6 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Create user with validation
-router.post("/", validateUserInput, async (req, res) => {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-
-    const { email, password, first_name, last_name, restaurant_id, role } =
-      req.body;
-
-    // Check if email already exists
-    const existingUser = await client.query(
-      "SELECT id FROM users WHERE email = $1",
-      [email]
-    );
-
-    if (existingUser.rows.length > 0) {
-      await client.query("ROLLBACK");
-      return res.status(409).json({ error: "Email already exists" });
-    }
-
-    // If restaurant_id is provided, verify it exists
-    if (restaurant_id) {
-      const restaurantExists = await client.query(
-        "SELECT id FROM restaurants WHERE id = $1",
-        [restaurant_id]
-      );
-      if (restaurantExists.rows.length === 0) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({ error: "Restaurant not found" });
-      }
-    }
-
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hashed_password = await bcrypt.hash(password, salt);
-
-    const userResult = await client.query(
-      `INSERT INTO users (
-        email, password_hash, first_name, last_name, 
-        restaurant_id, role
-      ) 
-      VALUES ($1, $2, $3, $4, $5, $6::user_role) 
-      RETURNING id, email, first_name, last_name, restaurant_id, role, created_at`,
-      [email, hashed_password, first_name, last_name, restaurant_id, role]
-    );
-
-    await client.query("COMMIT");
-    res.status(201).json(userResult.rows[0]);
-  } catch (error) {
-    await client.query("ROLLBACK");
-    console.error(error);
-    if (error.code === "22P02") {
-      res.status(400).json({ error: "Invalid role value" });
-    } else {
-      res.status(500).json({ error: "Internal server error" });
-    }
-  } finally {
-    client.release();
   }
 });
 

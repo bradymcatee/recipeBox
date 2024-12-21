@@ -13,10 +13,12 @@ app.use(express.json());
 // import routes
 const recipesRouter = require("./routes/recipes");
 const authRouter = require("./routes/auth"); // new auth routes
+const usersRouter = require("./routes/users");
 
 // use routes
 app.use("/recipes", recipesRouter);
 app.use("/auth", authRouter);
+app.use("/users", usersRouter);
 
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {
