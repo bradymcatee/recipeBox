@@ -16,11 +16,11 @@ import RecipesTable from "./components/RecipesTable";
 import RecipeForm from "./components/RecipeForm";
 import RecipeDetails from "./components/RecipeCard";
 import UsersTable from "./components/UsersTable";
+import Navbar from "./components/NavBar";
 
 // Move the routes to a separate component that's wrapped by AuthProvider
 const AppRoutes = () => {
   const { auth, logout } = useAuth();
-
   const Layout = () => {
     const navigate = useNavigate();
 
@@ -29,64 +29,14 @@ const AppRoutes = () => {
       navigate("/");
     };
 
-    if (auth && auth.user.role === "admin") {
-      return (
-        <>
-          (
-          <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <div className="container">
-              <Link className="navbar-brand" to="/recipes">
-                Recipe Box
-              </Link>
-              <div className="d-flex">
-                <span className="navbar-text me-3">
-                  {auth.user.firstName} ({auth.user.role})
-                </span>
-                <button
-                  className="btn btn-outline-secondary me-2"
-                  onClick={() => navigate("/users")}
-                >
-                  Manage Users
-                </button>
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </nav>
-          )
-          <Outlet />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <div className="container">
-              <Link className="navbar-brand" to="/recipes">
-                Recipe Box
-              </Link>
-              <div className="d-flex">
-                <span className="navbar-text me-3">
-                  {auth.user.firstName} ({auth.user.role})
-                </span>
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </nav>
-          <Outlet />
-        </>
-      );
-    }
+    return (
+      <>
+        <Navbar />
+        <Outlet />
+      </>
+    );
   };
+
   return (
     <Routes>
       <Route element={<Layout />}>

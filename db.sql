@@ -1,5 +1,13 @@
 CREATE DATABASE recipebox;
 
+CREATE TYPE user_role AS ENUM ('admin', 'manager', 'chef', 'line_cook');
+
+CREATE TABLE restaurants (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE recipes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -15,14 +23,6 @@ CREATE TABLE recipe_ingredients (
     description TEXT NOT NULL,
     sort_order INTEGER,
     PRIMARY KEY (recipe_id, sort_order)
-);
-
-CREATE TYPE user_role AS ENUM ('admin', 'manager', 'chef', 'line_cook');
-
-CREATE TABLE restaurants (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE users (
