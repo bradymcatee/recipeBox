@@ -17,6 +17,7 @@ import RecipeForm from "./components/RecipeForm";
 import RecipeDetails from "./components/RecipeCard";
 import UsersTable from "./components/UsersTable";
 import Navbar from "./components/NavBar";
+import RegisterUser from "./components/RegisterUser";
 
 // Move the routes to a separate component that's wrapped by AuthProvider
 const AppRoutes = () => {
@@ -58,6 +59,10 @@ const AppRoutes = () => {
         <Route
           path="/users"
           element={auth ? <UsersTable /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/users/new"
+          element={auth ? <RegisterUser /> : <Navigate to="/" />}
         />
         <Route
           path="/recipes"

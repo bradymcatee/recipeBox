@@ -58,7 +58,9 @@ const UsersTable = () => {
       )
       .sort((a, b) => {
         const multiplier = sortDirection === "asc" ? 1 : -1;
-        return multiplier * a[sortField].localeCompare(b[sortField]);
+        const aValue = a[sortField] ? a[sortField].toString() : "";
+        const bValue = b[sortField] ? b[sortField].toString() : "";
+        return multiplier * aValue.localeCompare(bValue);
       });
   };
 
@@ -81,7 +83,7 @@ const UsersTable = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Link to="/recipes/new" className="btn btn-success">
+        <Link to="/users/new" className="btn btn-success">
           Add New User
         </Link>
         <button className="btn btn-secondary" onClick={() => navigate(-1)}>

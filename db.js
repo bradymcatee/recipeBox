@@ -19,12 +19,4 @@ const pool = new Pool(
   process.env.NODE_ENV === "production" ? proConfig : devConfig
 );
 
-pool.query("SELECT * FROM recipes", (err, res) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
-  } else {
-    console.log("Database connected:", res.rows);
-  }
-});
-
 module.exports = pool;
