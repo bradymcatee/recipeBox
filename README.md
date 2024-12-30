@@ -2,6 +2,10 @@
 
 Recipe Box is a web application that allows restaurants to manage their recipes with user role-based permissions. Built with React, Node.js, Express, and PostgreSQL.
 
+## Live Demo
+
+Check out the live demo of this app here: https://recipecrate.app
+
 ## Features
 
 - User authentication and authorization
